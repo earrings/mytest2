@@ -32,6 +32,7 @@
         
         <service android:name=".FloatingService" android:enabled="true" />
         
+       
         
         <activity
             android:name="com.example.buttonActivity.MainActivity"

@@ -6,15 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -23,33 +19,21 @@ import android.media.MediaPlayer.OnInfoListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaPlayer.OnSeekCompleteListener;
 import android.media.MediaPlayer.OnVideoSizeChangedListener;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.MediaController;
 import android.widget.SimpleAdapter;
-import android.widget.VideoView;
-import android.os.Build;
 
 public class MainActivity extends Activity implements OnCompletionListener,
-		OnErrorListener, OnInfoListener, OnPreparedListener,
-		OnSeekCompleteListener, OnVideoSizeChangedListener,
-		SurfaceHolder.Callback {
+		OnErrorListener, OnInfoListener, OnPreparedListener,OnSeekCompleteListener,
+		OnVideoSizeChangedListener,SurfaceHolder.Callback {
 	private Display currDisplay;
 	private SurfaceView surfaceView;
 	private SurfaceHolder holder;
@@ -57,17 +41,17 @@ public class MainActivity extends Activity implements OnCompletionListener,
 	private int vWidth, vHeight;
 	private String dataPath;
 	private Intent floatingwindow = null;
-	private String TAG = "android.intent.action";
-	//MyBroadcastReceiver mr;
+	private String TAG = "android.intent.action.MainActivity";
+	MyBroadcastReceiver mr;
+	private Boolean playOrPause = true;
 
-	// private boolean readyToPlay = false;
+	 private boolean serviceStartOrstop = false;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setContentView(R.layout.activity_main);
 
-		// this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-		// //横屏显示
+		// this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);//横屏显示 
 		surfaceView = (SurfaceView) this.findViewById(R.id.video_surface);
 		ListView listView = (ListView) this.findViewById(R.id.lv);
 
@@ -76,41 +60,34 @@ public class MainActivity extends Activity implements OnCompletionListener,
 				new int[] { R.id.mp4 });
 		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(new ListView.OnItemClickListener() {
-
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				try {
+					//判断是不是正在播放中
 					if (player.isPlaying() == true) {
+						//重置播放器  然后可以重新塞如资源路径 调用prepare()方法
 						player.reset();
 					}
 					player.setAudioStreamType(AudioManager.STREAM_MUSIC);
 					player.setDisplay(holder);
-
 					System.out.println(holder + "@@@@@@@");
 					System.out.println(player + "@@@@@@@@@");
-
 					player.setDataSource(dataPath);
 				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (SecurityException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IllegalStateException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				try {
 					player.prepare();
 				} catch (IllegalStateException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				player.start();
@@ -123,6 +100,8 @@ public class MainActivity extends Activity implements OnCompletionListener,
 		// 为了可以播放视频或者使用Camera预览，我们需要指定其Buffer类型
 		holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
+		System.out.println("aaaaaaaaaaaaaaaaaaaaaa+ **************");
+		
 		// 下面开始实例化MediaPlayer对象
 		player = new MediaPlayer();
 		player.setOnCompletionListener(this);
@@ -134,14 +113,13 @@ public class MainActivity extends Activity implements OnCompletionListener,
 		System.out.println(holder + "------------");
 		System.out.println(player + "-------------");
 
-		Log.v("Begin:::", "surfaceDestroyed called");
 		// 然后指定需要播放文件的路径，初始化MediaPlayer
 		// String dataPath =
 		// Environment.getExternalStorageDirectory().getPath()+"/Test_Movie.m4v";
-		dataPath = "http://116.211.111.250/share.php?method=Share.download&cqid=1acc93049fd469acbe349ff025131a51&dt=53.e3050a26cec2eb1422c3ae24ecf9f4b2&e=1403107761&fhash=eae8797988d66421a32798437ae6674e537c29f8&fname=MOV008.mp4&fsize=15497693&nid=14029320224978335&scid=53&st=b4654676cf4300035c2118c2b3ff1004&xqid=198731395";
+		dataPath = "http://116.211.111.250/share.php?method=Share.download&cqid=1acc93049fd469acbe349ff025131a51&dt=53.e3050a26cec2eb1422c3ae24ecf9f4b2&e=1403320899&fhash=eae8797988d66421a32798437ae6674e537c29f8&fname=MOV008.mp4&fsize=15497693&nid=14029320224978335&scid=53&st=9983b999fac628e93cb7ce14ff4d3122&xqid=198731395";		
 		try {
 			player.setDataSource(dataPath);
-			Log.v("Next:::", "surfaceDestroyed called");
+			Log.v("Next:::", "Next called");
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (IllegalStateException e) {
@@ -156,10 +134,10 @@ public class MainActivity extends Activity implements OnCompletionListener,
 		floatingwindow.setClass(MainActivity.this, FloatingService.class);
 //		floatingwindow.putExtra("vWidth", vWidth);
 //		floatingwindow.putExtra("vHeight", vHeight);
-//		mr = new MyBroadcastReceiver();
-//		IntentFilter intentFilter = new IntentFilter();
-//		intentFilter.addAction(TAG);
-//		this.registerReceiver(mr, intentFilter);
+		mr = new MyBroadcastReceiver();
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(TAG);
+		this.registerReceiver(mr, intentFilter);
 //		Intent intent = getIntent();
 	}
 
@@ -171,16 +149,14 @@ public class MainActivity extends Activity implements OnCompletionListener,
 
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
-		Log.v("Surface Created:::", "surfaceChanged called");
+		Log.v("Surface Created:::", "surfaceCreated called");
 		// 当SurfaceView中的Surface被创建的时候被调用
 		// 在这里我们指定MediaPlayer在当前的Surface中进行播放
 		player.setDisplay(holder);
 		// 在指定了MediaPlayer播放的容器后，我们就可以使用prepare或者prepareAsync来准备播放了
 		try {
-			player.prepare();
+			player.prepareAsync();
 		} catch (IllegalStateException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
@@ -211,7 +187,7 @@ public class MainActivity extends Activity implements OnCompletionListener,
 	public void onPrepared(MediaPlayer player) {
 		// 当prepare完成后，该方法触发，在这里我们播放视频
 
-		Log.v(" onPrepared:::", "surfaceChanged called");
+		Log.v(" onPrepared:::", "onPrepared called");
 
 		// 首先取得video的宽和高
 		vWidth = player.getVideoWidth();
@@ -236,6 +212,8 @@ public class MainActivity extends Activity implements OnCompletionListener,
 			// 然后开始播放视频
 
 			player.start();
+			//player.pause();
+			
 		}
 	}
 
@@ -271,6 +249,8 @@ public class MainActivity extends Activity implements OnCompletionListener,
 		return false;
 	}
 
+	
+	//当MediaPlayer播放结束后执行这个方法
 	@Override
 	public void onCompletion(MediaPlayer player) {
 		// 当MediaPlayer播放完成后触发
@@ -278,7 +258,9 @@ public class MainActivity extends Activity implements OnCompletionListener,
 		player.stop();
 		// this.finish();
 	}
-
+	
+	
+	//得到视频的播放列表
 	private List<Map<String, String>> gtPlayList() {
 		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
 		Map<String, String> map1 = new HashMap<String, String>();
@@ -295,39 +277,61 @@ public class MainActivity extends Activity implements OnCompletionListener,
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		// TODO Auto-generated method stub
-		System.out.println("on TouchEvent start --------------------");
-		int position = this.player.getCurrentPosition();
-		floatingwindow.putExtra("position", position);
-		floatingwindow.putExtra("max", player.getDuration());
-		floatingwindow.putExtra("visable", true); //
-		floatingwindow.putExtra("vWidth", vWidth);
-		floatingwindow.putExtra("vHeight", vHeight);
-		startService(floatingwindow);
-		return super.onTouchEvent(event);
+		if (event.getAction() != MotionEvent.ACTION_UP) {
+			return super.onTouchEvent(event);
+		} // else ACTION_UP
+		
+		if(!serviceStartOrstop){
+			System.out.println("on TouchEvent start --------------------");
+			int position = this.player.getCurrentPosition();
+			//视频当前播放的长度 单位毫秒
+			floatingwindow.putExtra("position", position);
+			//视频总的长度  单位毫秒
+			floatingwindow.putExtra("max", player.getDuration());
+			floatingwindow.putExtra("visable", true); //
+			floatingwindow.putExtra("vWidth", vWidth);
+			floatingwindow.putExtra("vHeight", vHeight);
+			floatingwindow.putExtra("playOrPause", playOrPause);
+			System.out.println(playOrPause + "???????????????????????????????????");
+			startService(floatingwindow);
+			serviceStartOrstop = true;
+		}else{
+			System.out.println("on TouchEvent end --------------------");
+			stopService(floatingwindow);
+			serviceStartOrstop = false;
+		}
+		return true;
 	}
 
-//	public class MyBroadcastReceiver extends BroadcastReceiver { // 自定义广播接受者
-//		@Override
-//		public void onReceive(Context arg0, Intent intent) {
-//			// TODO Auto-generated method stub
-//			String action = intent.getAction();
-//			System.out.println(action + "&&&&&&&&&&&&&&&&&&&&&");
-//			System.out.println(TAG+ "&&&&&&&&&&&&&&&&&&&&&&&");
-//			if (action.equals(TAG)) {
-//				String flag = intent.getStringExtra("flag");
-//				if (flag.equals("play")) {
-//					if (!player.isPlaying())
-//						player.start();
-//				} else if (flag.equals("pause")) {
-//					if (player.isPlaying())
-//						player.pause(); // 暂停
-//				} else {
-//					MainActivity.this.finish();
-//				}
-//			}
-//		}
-//	}
+	public class MyBroadcastReceiver extends BroadcastReceiver { // 自定义广播接受者
+		@Override
+		public void onReceive(Context arg0, Intent intent) {
+			// TODO Auto-generated method stub
+			String action = intent.getAction();
+			System.out.println(action + "&&&&&&&&&&&&&&&&&&&&&");
+			System.out.println(TAG+ "&&&&&&&&&&&&&&&&&&&&&&&");
+			if (action.equals(TAG)) {
+				String flag = intent.getStringExtra("flag");
+				System.out.println(flag + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+				if (flag.equals("play")) {
+					if (!player.isPlaying()){
+						player.start();							
+						System.out.println("开始播放视频");
+					}
+					playOrPause = false;
+				} else if (flag.equals("pause")) {
+					if (player.isPlaying()){
+						player.pause(); // 暂停
+						
+						System.out.println("暂停视频");
+					}
+					playOrPause = true;
+				} else {
+					MainActivity.this.finish();
+				}
+			}
+		}
+	}
 }
 
 // @Override

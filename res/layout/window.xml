@@ -4,45 +4,75 @@
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
         android:orientation="vertical"
-        android:id="@+id/linearLayout1"
-        >
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="bottom"
-        android:orientation="vertical" >
-
-        <SeekBar
-            android:id="@+id/progress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dip"
-            android:layout_marginRight="10dip" />
+        android:id="@+id/linearLayout1">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dip"
-            android:gravity="center"
+            android:layout_width="fill_parent"
+            android:layout_height="30dip"
+            android:gravity="bottom"
             android:orientation="horizontal" >
 
             <ImageButton
                 android:id="@+id/play"
-                android:layout_width="wrap_content"
+                android:layout_width="30dip"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="5dip"
-                android:background="#FF000000"
+                
+                android:layout_weight="1"
+                android:background="@drawable/moveback"
                 android:src="@drawable/play" />
 
-            <ImageButton
+      <!--        <ImageButton
                 android:id="@+id/pause"
-                android:layout_width="wrap_content"
+                android:layout_width="30dip"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="5dip"
                 android:background="#FF000000"
-                android:src="@drawable/pause" />
+                android:layout_weight="1"
+                android:src="@drawable/pause" /> -->
+
+            <SeekBar
+                android:id="@+id/progress"
+                android:layout_width="150dip"
+                android:layout_height="30dip"
+                android:background="@drawable/moveback"
+                android:layout_weight="6.10" />
+			
+            <TextView
+                android:id="@+id/movePosition"
+                android:layout_width="40dip"
+                android:background="@drawable/moveback"
+                android:layout_height="30dip"
+                android:gravity="center"
+                >
+                </TextView>
+            <TextView
+                android:id="@+id/moveMax"
+                android:layout_width="40dip"
+                android:layout_height="30dip"
+                android:gravity="center"
+                 android:background="@drawable/moveback"
+                >
+                </TextView>
+              <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="30dip"
+                android:background="@drawable/moveback"
+                 />
+            
+            <ImageButton
+                android:id="@+id/scale1"
+                android:layout_width="wrap_content"
+                android:layout_height="30dip"
+                android:background="#FF000000"
+                android:src="@drawable/big1" />
+            
+            <ImageButton
+                android:id="@+id/scale"
+                android:layout_width="wrap_content"
+                android:layout_height="30dip"
+                android:background="#FF000000"
+                android:src="@drawable/big2" 
+                android:layout_weight="1"/>
         </LinearLayout>
-    </LinearLayout>
 
 </LinearLayout>
