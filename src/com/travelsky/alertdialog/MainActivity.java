@@ -1,6 +1,7 @@
 package com.travelsky.alertdialog;
 
-import com.example.hellodear.R;
+
+import com.travelsky.movie.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;

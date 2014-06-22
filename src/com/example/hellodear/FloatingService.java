@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.Formatter;
 import java.util.Locale;
 
+import com.travelsky.movie.R;
+
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;

@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.example.hellodear.R;
 import com.travelsky.utils.ItemArrayAdapter;
 import com.travelsky.utils.ListItem;
 
@@ -22,6 +22,8 @@ import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaPlayer.OnSeekCompleteListener;
 import android.media.MediaPlayer.OnVideoSizeChangedListener;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Display;
 import android.view.SurfaceHolder;
@@ -33,8 +35,12 @@ import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.MediaController;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnCompletionListener,
 		OnErrorListener, OnInfoListener, OnPreparedListener,
@@ -50,7 +56,10 @@ public class MainActivity extends Activity implements OnCompletionListener,
 	private Boolean movieDisplay = true;
 	TextView movePosition, moveMax;
 	ImageButton play = null,scale = null;
-
+	private AtomicBoolean isPrepared = new AtomicBoolean(false);//防止视频没加载的时候就去取视频最大的时间;
+	private SeekBar mProgress;
+	private Handler mHandler;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -63,14 +72,43 @@ public class MainActivity extends Activity implements OnCompletionListener,
 		moveMax = (TextView) this.findViewById(R.id.moveMax);
 		play = (ImageButton)this.findViewById(R.id.play);
 		scale = (ImageButton)this.findViewById(R.id.scale);
-		
+		mProgress = (SeekBar)this.findViewById(R.id.progress);
+		mProgress.setEnabled(false);
 
 		List<ListItem> items = getListItems();
-
-//		ItemArrayAdapter adapter = new ItemArrayAdapter(MainActivity.this,items);
-
-//		listView.setAdapter(adapter);
+		ItemArrayAdapter adapter = new ItemArrayAdapter(MainActivity.this,R.layout.sd_list,items);
+		listView.setAdapter(adapter);
 		
+		mProgress.setOnSeekBarChangeListener(new  OnSeekBarChangeListener(){
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress,
+					boolean fromUser) {
+				System.out.println(progress);
+				//拖动后显示放到的位置
+				movePosition.setText(getTimeString(progress));
+				if (fromUser) {
+				//if(isPrepared.get()){
+					//int max = player.getDuration();
+					//mProgress.setMax(max);
+					
+					//视频拖动后需要放的位置
+					player.seekTo(progress);
+				//}else{
+					
+				//}
+				}
+			}
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+				Toast.makeText(getApplicationContext(), "onStartTrackingTouch" , 
+                        Toast.LENGTH_SHORT).show(); 
+			}
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				 Toast.makeText(getApplicationContext(), "onStopTrackingTouch" , 
+	                        Toast.LENGTH_SHORT).show(); 
+			}		
+		});
 		
 		// 一进来的时候把视频控制按钮给隐藏了
 		linearLayout.setVisibility(View.INVISIBLE);
@@ -78,11 +116,12 @@ public class MainActivity extends Activity implements OnCompletionListener,
 			@Override
 			public void onClick(View v) {
 				if(player.isPlaying()){
-					play.setImageResource(R.drawable.pause);
+					play.setImageResource(R.drawable.play);
 					player.pause();
 				}else {
-					play.setImageResource(R.drawable.play);
+					play.setImageResource(R.drawable.pause);
 					player.start();
+					mHandler.sendEmptyMessage(2);
 				}
 			}
 		});
@@ -94,27 +133,37 @@ public class MainActivity extends Activity implements OnCompletionListener,
 		//		MainActivity.this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);//去掉信息栏
 				MainActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 			}
-		});
-		
+		});	
 		surfaceView.setOnClickListener(new OnClickListener() {
 			@Override
-			public void onClick(View v) {
-				int position = player.getCurrentPosition();// 视频当前播放所在时间
-				int max = player.getDuration();// 视频的最大时间长度
-				if (movieDisplay) {
-					System.out.println("我点击了surface");
-					
-					System.out.println(getTimeString(position)+"-------------");
-					System.out.println(getTimeString(max)+"-------------");
-					movePosition.setText(getTimeString(position));
-					moveMax.setText(getTimeString(max));
-					linearLayout.setVisibility(View.VISIBLE);
-					movieDisplay = false;
-				} else {
-					linearLayout.setVisibility(View.INVISIBLE);
-					movieDisplay = true;
+			public void onClick(View v) {			
+				if(isPrepared.get()){
+					int position = player.getCurrentPosition();// 视频当前播放所在时间
+					int max = player.getDuration();// 视频的最大时间长度
+					if (movieDisplay) {
+						System.out.println("我点击了surface");
+						movePosition.setText(getTimeString(position));
+						moveMax.setText(getTimeString(max));
+						linearLayout.setVisibility(View.VISIBLE);
+						movieDisplay = false;
+					} else {
+						linearLayout.setVisibility(View.INVISIBLE);
+						movieDisplay = true;
+					}
+				}else{
+					int position = 0;// 视频当前播放所在时间
+					int max = 0;// 视频的最大时间长度
+					if (movieDisplay) {
+						System.out.println("我点击了surface+=+++");
+						movePosition.setText(getTimeString(position));
+						moveMax.setText(getTimeString(max));
+						linearLayout.setVisibility(View.VISIBLE);
+						movieDisplay = false;
+					} else {
+						linearLayout.setVisibility(View.INVISIBLE);
+						movieDisplay = true;
+					}
 				}
-
 			}
 		});
 		// listView展示播放列表
@@ -127,14 +176,15 @@ public class MainActivity extends Activity implements OnCompletionListener,
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
+				isPrepared.set(false);
+				System.out.println( " onclick + ++++++++");
 				try {
-					// 判断是不是正在播放中
-					if (player.isPlaying() == true) {
-						// 重置播放器 然后可以重新塞如资源路径 调用prepare()方法
-						player.reset();
-					}
+					System.out.println("reset+ ***************");
+					//重新设置资源的时候不管是不是在播放中，直接reset这样才不会出错
+					player.reset();
 					player.setAudioStreamType(AudioManager.STREAM_MUSIC);
 					player.setDisplay(holder);
+					System.out.println("*****"+ dataPath);
 					player.setDataSource(dataPath);
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
@@ -146,19 +196,15 @@ public class MainActivity extends Activity implements OnCompletionListener,
 					e.printStackTrace();
 				}
 				try {
-					player.prepare();
+					System.out.println("视频准备播放中");
+					player.prepareAsync();
 				} catch (IllegalStateException e) {
 					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				
-				System.out.println("视频准备播放中");
-				player.start();
-				System.out.println("视频准备播放中");
+				}			
+				//player.start();
+			//	System.out.println("视频准备播放中");
 			}
 		});
-
 		// 给SurfaceView添加CallBack监听
 		holder = surfaceView.getHolder();
 		holder.addCallback(this);
@@ -173,18 +219,38 @@ public class MainActivity extends Activity implements OnCompletionListener,
 		player.setOnSeekCompleteListener(this);
 		player.setOnVideoSizeChangedListener(this);
 		// 然后指定需要播放文件的路径，初始化MediaPlayer
-		dataPath = "http://116.211.111.250/share.php?method=Share.download&cqid=1acc93049fd469acbe349ff025131a51&dt=53.e3050a26cec2eb1422c3ae24ecf9f4b2&e=1403320899&fhash=eae8797988d66421a32798437ae6674e537c29f8&fname=MOV008.mp4&fsize=15497693&nid=14029320224978335&scid=53&st=9983b999fac628e93cb7ce14ff4d3122&xqid=198731395";
-		try {
-			player.setDataSource(dataPath);
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		dataPath = "http://116.211.111.250/share.php?method=Share.download&cqid=1acc93049fd469acbe349ff025131a51&dt=53.e3050a26cec2eb1422c3ae24ecf9f4b2&e=1403588169&fhash=eae8797988d66421a32798437ae6674e537c29f8&fname=MOV008.mp4&fsize=15497693&nid=14029320224978335&scid=53&st=8d3a50ee2c47b243b68415a28835cdf8&xqid=198731395";		
+//		try {
+//			player.setDataSource(dataPath);
+//		} catch (IllegalArgumentException e) {
+//			e.printStackTrace();
+//		} catch (IllegalStateException e) {
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 		// 然后，我们取得当前Display对象
 		currDisplay = this.getWindowManager().getDefaultDisplay();
+		
+		mHandler = new Handler() {
+	        @Override
+	        public void handleMessage(Message msg) {
+	        	System.out.println("执行线程+++++++++++++++++++++++++++++++");
+	            int pos;
+	            switch (msg.what) {
+	                case 1:
+	                    break;
+	                case 2:
+	                    pos = setProgress();
+	           //         if (!mDragging && mShowing && player.isPlaying()) {
+	                    if (player.isPlaying()) {
+	                        msg = obtainMessage(2);
+	                        sendMessageDelayed(msg, 1000 - (pos % 1000));
+	                    }
+	                    break;
+	            }
+	        }
+	    };
 
 	}
 
@@ -222,6 +288,10 @@ public class MainActivity extends Activity implements OnCompletionListener,
 	@Override
 	public void onPrepared(MediaPlayer mp) {
 		// 当prepare完成后，该方法触发，在这里我们播放视频
+		isPrepared.set(true);
+		mProgress.setEnabled(true);
+		mProgress.setMax(mp.getDuration());
+		moveMax.setText(getTimeString(mp.getDuration()));
 		Log.v(" onPrepared:::", "onPrepared called");
 		// 首先取得video的宽和高
 		vWidth = player.getVideoWidth();
@@ -237,14 +307,14 @@ public class MainActivity extends Activity implements OnCompletionListener,
 			vWidth = (int) Math.ceil((float) vWidth / ratio);
 			vHeight = (int) Math.ceil((float) vHeight / ratio);
 			// 设置surfaceView的布局参数
-			surfaceView.setLayoutParams(new LinearLayout.LayoutParams(vWidth,
-					vHeight));
+			surfaceView.setLayoutParams(new LinearLayout.LayoutParams(vWidth,vHeight));
 			// 然后开始播放视频
+			System.out.println("播放11111111111111");
 			player.start();
-			// player.pause();
+			mHandler.sendEmptyMessage(2);
+			System.out.println("播放11111111111111");
 		}
 	}
-
 	@Override
 	public boolean onInfo(MediaPlayer mp, int what, int extra) {
 		// 当一些特定信息出现或者警告时触发
@@ -281,7 +351,9 @@ public class MainActivity extends Activity implements OnCompletionListener,
 	public void onCompletion(MediaPlayer mp) {
 		// 当MediaPlayer播放完成后触发
 		Log.v("Play onCompletion:::", "onComletion called");
-		player.stop();
+		if(player.isPlaying()){
+			player.stop();
+		}
 		// this.finish();
 	}
 
@@ -301,7 +373,7 @@ public class MainActivity extends Activity implements OnCompletionListener,
 	}
 
 	// 通过毫秒得到视频的分钟数和秒数
-	public String getTimeString(long time) {
+	public static String getTimeString(long time) {
 		// long hour = time / (60 * 60 * 1000);
 		long minute = (time) / (60 * 1000);
 		long second = (time - minute * 60 * 1000) / 1000;
@@ -343,4 +415,30 @@ public class MainActivity extends Activity implements OnCompletionListener,
 		items.add(new ListItem(R.drawable.publicity,"海南生态园领导视察","2014-06-24",R.drawable.pictureplay));
 		return items;
 	}
+	
+	
+    
+    
+    private int setProgress() {
+      //  if (player == null || mDragging) {
+    	if(player == null){
+            return 0;
+        }
+        int position = player.getCurrentPosition();
+        int duration = player.getDuration();
+        if (mProgress != null) {
+            if (duration > 0) {
+                // use long to avoid overflow
+                mProgress.setProgress(position);
+            }
+            //int percent = 2;
+            //mProgress.setSecondaryProgress(percent * 10);
+        }
+//        if (moveMax != null)
+//        	moveMax.setText(getTimeString(duration));
+        if (movePosition != null)
+        	movePosition.setText(getTimeString(position));
+        return position;
+    }
+
 }

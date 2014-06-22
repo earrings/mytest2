@@ -1,6 +1,7 @@
 package com.travelsky.layouttest;
 
-import com.example.hellodear.R;
+
+import com.travelsky.movie.R;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;

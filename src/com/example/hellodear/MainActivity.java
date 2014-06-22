@@ -6,6 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.travelsky.movie.R;
+import com.travelsky.utils.ItemArrayAdapter;
+import com.travelsky.utils.ListItem;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -55,10 +59,19 @@ public class MainActivity extends Activity implements OnCompletionListener,
 		surfaceView = (SurfaceView) this.findViewById(R.id.video_surface);
 		ListView listView = (ListView) this.findViewById(R.id.lv);
 
-		SimpleAdapter adapter = new SimpleAdapter(this, gtPlayList(),
-				R.layout.sd_list, new String[] { "name" },
-				new int[] { R.id.mp4 });
-		listView.setAdapter(adapter);
+//		SimpleAdapter adapter = new SimpleAdapter(this, gtPlayList(),
+//				R.layout.sd_list, new String[] { "name" },
+//				new int[] { R.id.mp4 });
+//		listView.setAdapter(adapter);
+		
+		//新加的自定义Adapter
+		List<ListItem> items = getListItems();
+
+//		ItemArrayAdapter adapter = new ItemArrayAdapter(MainActivity.this, R.layout.window);
+
+//		listView.setAdapter(adapter);
+		
+		
 		listView.setOnItemClickListener(new ListView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
@@ -331,6 +344,17 @@ public class MainActivity extends Activity implements OnCompletionListener,
 				}
 			}
 		}
+	}
+	
+	private List<ListItem> getListItems(){
+		List<ListItem> items = new ArrayList<ListItem>();
+
+		items.add(new ListItem(R.drawable.publicity,"海南生态园1","2014-06-22",R.drawable.pictureplay));
+		items.add(new ListItem(R.drawable.publicity,"海南生态园2","2014-06-22",R.drawable.pictureplay));
+		items.add(new ListItem(R.drawable.publicity,"海南生态园3","2014-06-22",R.drawable.pictureplay));
+		items.add(new ListItem(R.drawable.publicity,"海南生态园4","2014-06-22",R.drawable.pictureplay));
+		items.add(new ListItem(R.drawable.publicity,"海南生态园5","2014-06-22",R.drawable.pictureplay));
+		return items;
 	}
 }
 

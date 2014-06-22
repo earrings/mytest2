@@ -10,7 +10,7 @@ import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.AndroidHttpTransport;
 import org.xmlpull.v1.XmlPullParserException;
 
-import com.example.hellodear.R;
+import com.travelsky.movie.R;
 
 import android.app.Activity;
 import android.os.Bundle;

@@ -1,6 +1,7 @@
 package com.travelsky.seekbar;
 
-import com.example.hellodear.R;
+
+import com.travelsky.movie.R;
 
 import android.app.Activity;
 import android.os.Bundle;
