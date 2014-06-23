@@ -29,6 +29,7 @@ import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -36,11 +37,13 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.MediaController;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 public class MainActivity extends Activity implements OnCompletionListener,
 		OnErrorListener, OnInfoListener, OnPreparedListener,
@@ -53,6 +56,7 @@ public class MainActivity extends Activity implements OnCompletionListener,
 	private Display currDisplay;
 	private int vWidth, vHeight;
 	LinearLayout linearLayout;
+	RelativeLayout relativeLayout;
 	private Boolean movieDisplay = true;
 	TextView movePosition, moveMax;
 	ImageButton play = null,scale = null;
@@ -68,6 +72,7 @@ public class MainActivity extends Activity implements OnCompletionListener,
 		surfaceView = (SurfaceView) this.findViewById(R.id.video_surface);
 		ListView listView = (ListView) this.findViewById(R.id.lv);
 		linearLayout = (LinearLayout) this.findViewById(R.id.control_movie);
+		relativeLayout= (RelativeLayout) this.findViewById(R.id.surface_movie);
 		movePosition = (TextView) this.findViewById(R.id.movePosition);
 		moveMax = (TextView) this.findViewById(R.id.moveMax);
 		play = (ImageButton)this.findViewById(R.id.play);
@@ -128,10 +133,33 @@ public class MainActivity extends Activity implements OnCompletionListener,
 		scale.setOnClickListener(new OnClickListener() {		
 			@Override
 			public void onClick(View v) {
+				System.out.println("点击切换到全屏模式*********");
 		//		MainActivity.this.requestWindowFeature(Window.FEATURE_NO_TITLE);//去掉标题栏
-				linearLayout.setLayoutParams(new LinearLayout.LayoutParams(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN));
+//				MainActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+//				//relativeLayout.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
+//				relativeLayout.setLayoutParams(new LinearLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
 		//		MainActivity.this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);//去掉信息栏
-				MainActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+//				MainActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+				int val = MainActivity.this.getWindow().getAttributes().flags;
+//		        // 全屏 66816 - 非全屏 65792
+	        if(val != 66816){//非全屏
+	        	MainActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+				//relativeLayout.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
+				relativeLayout.setLayoutParams(new LinearLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
+	        
+//		        	System.out.println("11111111111111");
+////		        	MainActivity.this.getWindow().setFlags(
+////		                    WindowManager.LayoutParams.FLAG_FULLSCREEN,
+////		                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//	        	  WindowManager.LayoutParams params = getWindow().getAttributes();  
+//                    params.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;  
+//                    getWindow().setAttributes(params);  
+//                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);  
+		        }else{//取消全屏
+//		        	System.out.println("2222222222222");
+		        	MainActivity.this.getWindow().clearFlags(
+		                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		        }
 			}
 		});	
 		surfaceView.setOnClickListener(new OnClickListener() {
@@ -307,7 +335,8 @@ public class MainActivity extends Activity implements OnCompletionListener,
 			vWidth = (int) Math.ceil((float) vWidth / ratio);
 			vHeight = (int) Math.ceil((float) vHeight / ratio);
 			// 设置surfaceView的布局参数
-			surfaceView.setLayoutParams(new LinearLayout.LayoutParams(vWidth,vHeight));
+			//surfaceView.setLayoutParams(new LinearLayout.LayoutParams(vWidth,vHeight));
+			surfaceView.setLayoutParams(new RelativeLayout.LayoutParams(vWidth,vHeight));
 			// 然后开始播放视频
 			System.out.println("播放11111111111111");
 			player.start();
